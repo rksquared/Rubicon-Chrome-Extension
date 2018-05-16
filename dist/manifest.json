@@ -1,26 +1,29 @@
 {
-    "manifest_version": 2,
+  "manifest_version": 2,
 
-    "name": "Chrome Extension (built with TypeScript + React)",
-    "description":
-        "A boilerplate project to quickly build a Chrome extension using TypeScript and React (built using webpack).",
-    "version": "1.0.0",
+  "name": "Rubicon",
+  "description": "Keep track of your history/tabs!",
+  "version": "0.0.1",
 
-    "browser_action": {
-        "default_icon": "icon16.png",
-        "default_popup": "popup.html"
-    },
+  "icons": {
+    "16": "assets/logo.png",
+    "48": "assets/logo.png",
+    "128": "assets/logo.png"
+  },
 
-    "background": {
-        "scripts": ["js/eventPage.js"],
-        "persistent": false
-    },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["/static/css/app.css"],
+      "js": ["/static/js/app.js"],
+      "run_at": "document_end"
+    }
+  ],
 
-    "icons": {
-        "16": "icon16.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
-    },
-
-    "permissions": []
+  "permissions": [
+    "tabs",
+    "cookies",
+    "<all_urls>",
+    "storage"
+  ]
 }
