@@ -1,5 +1,5 @@
 {
-  "name": "rubicon-frontend",
+  "name": "rubicon-chrome-extension",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
