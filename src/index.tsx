@@ -3,4 +3,10 @@ import * as reactDom from 'react-dom';
 import App from './App';
 import { GraphData } from './sampleData';
 
-reactDom.render(<App data={GraphData} width={200} height={200} />, document.getElementById('root'));
+const app = document.createElement('div');
+app.id = 'root';
+
+const doc: any = document.body;
+doc.append(app);
+
+reactDom.render(<App data={GraphData} width={window.innerWidth} height={200} />, document.getElementById('root'));

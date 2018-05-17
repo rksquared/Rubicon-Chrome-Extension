@@ -22,6 +22,7 @@ export default class ForceGraph extends Component<IProps, {}> {
 
 
   public componentDidMount() {
+    chrome.runtime.sendMessage({ popupMounted: true });
     if (this.ctrls.mountPoint !== undefined) {
       const { width, height, data } = this.props;
 
@@ -88,18 +89,18 @@ export default class ForceGraph extends Component<IProps, {}> {
     return <div style={style} id="footer" ref={mountPoint => (this.ctrls.mountPoint = mountPoint)} />;
   }
 
-  private dragStarted(d: any) {
+  private dragStarted = (d: any) => {
     this.force.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
   }
 
-  private dragged(d: any) {
+  private dragged = (d: any) => {
     d.fx = d3.event.x;
     d.fy = d3.event.y;
   }
 
-  private dragEnded(d: any) {
+  private dragEnded = (d: any) => {
     this.force.alphaTarget(0);
     d.fx = null;
     d.fy = null;

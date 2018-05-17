@@ -1,9 +1,9 @@
 const path = require("path");
 
 module.exports = {
-    mode: "development",
     entry: {
-        app: path.join(__dirname, "src/index.tsx")
+        app: path.join(__dirname, "src/index.tsx"),
+        eventPage: path.join(__dirname, "src/eventPage.tsx")
     },
     devtool: "inline-source-map",
     output: {
@@ -17,21 +17,18 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: "ts-loader"
             },
-            {
-                exclude: /node_modules/,
-                test: /\.scss$/,
+             {
+                test: /\.css$/,
                 use: [
-                    {
-                        loader: "style-loader" // Creates style nodes from JS strings
+                  require.resolve('style-loader'),
+                  {
+                    loader: require.resolve('css-loader'),
+                    options: {
+                      importLoaders: 1,
                     },
-                    {
-                        loader: "css-loader" // Translates CSS into CommonJS
-                    },
-                    {
-                        loader: "sass-loader" // Compiles Sass to CSS
-                    }
-                ]
-            }
+                  },
+                ],
+              }
         ]
     },
     resolve: {

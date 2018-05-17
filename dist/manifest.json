@@ -11,14 +11,23 @@
     "128": "assets/logo.png"
   },
 
+  "browser_action": {
+    "default_popup": "index.html"
+  },
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": ["/static/css/app.css"],
-      "js": ["/static/js/app.js"],
+      "css": ["/css/App.css"],
+      "js": ["/js/app.js"],
       "run_at": "document_end"
     }
   ],
+
+  "background": {
+    "scripts": ["js/eventPage.js"],
+    "persisten": true
+  },
 
   "permissions": [
     "tabs",
