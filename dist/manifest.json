@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+
+  "name": "Rubicon",
+  "description": "Keep track of your history/tabs!",
+  "version": "0.0.1",
+
+  "icons": {
+    "16": "assets/logo.png",
+    "48": "assets/logo.png",
+    "128": "assets/logo.png"
+  },
+
+  "browser_action": {
+    "default_popup": "index.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["/css/App.css"],
+      "js": ["/js/app.js"],
+      "run_at": "document_end"
+    }
+  ],
+
+  "background": {
+    "scripts": ["js/eventPage.js"],
+    "persistent": true
+  },
+
+  "permissions": [
+    "tabs",
+    "cookies",
+    "<all_urls>",
+    "storage"
+  ]
+}
