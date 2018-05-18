@@ -48,14 +48,13 @@ class HistoryGraphView extends React.Component {
                 .attr("y", -8)
                 .attr("width", 20)
                 .attr("height", 20)
-                .on('click', (d: any) => {
-                    chrome.runtime.sendMessage({type: "deleteNode", data: d, nodes: this.nodes}, ([nodes, links]) => {
-                        this.nodes = nodes;
-                        this.links = links;
+            node.on('click', (d: any) => {
+                    chrome.runtime.sendMessage({type: "deleteNode", data: d, nodes: this.nodes, links: this.links}, ([nodes, links]) => {
+                        this.setNodesAndLinks(nodes, links);
                         restart(simulation);
                     });
                 })
-                    .call(d3.drag()
+                    node.call(d3.drag()
                         .on("start", dragstarted)
                         .on("drag", dragged)
                         .on("end", dragended))
@@ -79,33 +78,25 @@ class HistoryGraphView extends React.Component {
         }
 
         restart(simulation);     
-        const addNodeTimer = (i = 2) => {
-            setTimeout(() => {
-                chrome.runtime.sendMessage({type: "addNode", data: i, nodes: this.nodes}, ([nodes, links]) => {
-                    this.nodes = nodes;
-                    this.links = links;
-                    restart(simulation);
-                    if (i < 1000) {
-                        addNodeTimer(i + 1);
-                    }
-                });
-            }, 2000)
-        }
-        addNodeTimer();
+        // const addNodeTimer = (i = 2) => {
+        //     setTimeout(() => {
+        //         chrome.runtime.sendMessage({type: "addNode", data: i, nodes: this.nodes, links: this.links}, ([nodes, links]) => {
+        //             this.setNodesAndLinks(nodes, links);
+        //             restart(simulation);
+        //             if (i < 1000) {
+        //                 addNodeTimer(i + 1);
+        //             }
+        //         });
+        //     }, 2000)
+        // }
+        // addNodeTimer();
 
         function ticked() {
-            const positions = {};
-            node.attr("cx", (d: any) => {
-                positions[d.data.name] = [d.x, d.y];
-                return d.x;
-            })
-            
             node.attr('transform', (d: any) => `translate(${d.x}, ${d.y})`)
-
-            link.attr("x1", (d: any) => positions[d.source.data.name][0])
-                .attr("y1", (d: any) => positions[d.source.data.name][1])
-                .attr("x2", (d: any) => positions[d.target.data.name][0])
-                .attr("y2", (d: any) => positions[d.target.data.name][1]);
+            link.attr("x1", (d: any) => d.source.x)
+                .attr("y1", (d: any) => d.source.y)
+                .attr("x2", (d: any) => d.target.x)
+                .attr("y2", (d: any) => d.target.y);
         }
 
         function dragstarted(d: any) {
@@ -131,9 +122,8 @@ class HistoryGraphView extends React.Component {
     }
 
     public componentDidMount() {
-        chrome.runtime.sendMessage({type: "getNodesAndLinks", nodes: this.nodes}, ([nodes, links]) => {
-            this.nodes = nodes;
-            this.links = links;
+        chrome.runtime.sendMessage({type: "getNodesAndLinks", nodes: this.nodes, links: this.links}, ([nodes, links]) => {
+            this.setNodesAndLinks(nodes, links);
             this.loadGraph();
         });          
     }
@@ -144,6 +134,20 @@ class HistoryGraphView extends React.Component {
         <svg width="960" height="500"  ref={(ref: SVGSVGElement) => this.ref = ref}/>
       </div>
     );
+  }
+
+  private setNodesAndLinks(nodes, links) {
+    this.nodes = nodes;
+    const nodeDict = {};
+    for (const n of this.nodes) {
+        nodeDict[n.data.name] = n;
+    }
+    this.links = links;
+    for (let i = 0; i < this.links.length; i++) {
+        const link: any = this.links[i]
+        link.source = nodeDict[link.source.data.name];
+        link.target = nodeDict[link.target.data.name];
+    }
   }
 }
 
