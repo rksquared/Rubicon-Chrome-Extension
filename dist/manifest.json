@@ -26,7 +26,7 @@
 
   "background": {
     "scripts": ["js/eventPage.js"],
-    "persisten": true
+    "persistent": true
   },
 
   "permissions": [
