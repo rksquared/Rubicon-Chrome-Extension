@@ -3,7 +3,9 @@ const path = require("path");
 module.exports = {
     entry: {
         app: path.join(__dirname, "src/index.tsx"),
-        eventPage: path.join(__dirname, "src/eventPage.tsx")
+        eventPage: path.join(__dirname, "src/eventPage.tsx"),
+        auth: path.join(__dirname, "src/auth.ts"),
+        oauthFlow: path.join(__dirname, "src/oauthFlow.ts")
     },
     devtool: "inline-source-map",
     output: {
