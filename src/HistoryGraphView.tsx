@@ -130,7 +130,7 @@ class HistoryGraphView extends React.Component {
 
   public render() {
     return (
-      <div className="App">
+      <div className="App" id="footer">
         <svg width="960" height="500"  ref={(ref: SVGSVGElement) => this.ref = ref}/>
       </div>
     );

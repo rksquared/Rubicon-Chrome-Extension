@@ -3,8 +3,11 @@ import * as d3 from 'd3';
 import { SimulationNodeDatum } from 'd3';
 
 
+
 let nodes: HistoryGraphNode[] = [];
 let links: Array<{source: SimulationNodeDatum, target: SimulationNodeDatum}> = [];
+
+console.log(nodes);
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
