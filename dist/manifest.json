@@ -18,14 +18,15 @@
   },
 
   "browser_action": {
-    "default_title": "login"
+    "default_title": "menu",
+    "default_popup": "auth.html"
   },
 
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "css": ["/css/App.css"],
-      "js": ["/js/app.js"],
+      "js": ["/js/app.js", "/js/menu.js"],
       "run_at": "document_end"
     }
   ],
