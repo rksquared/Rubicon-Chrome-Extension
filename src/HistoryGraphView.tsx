@@ -77,19 +77,7 @@ class HistoryGraphView extends React.Component {
                 restartingSimulation.alpha(1).restart();
         }
 
-        restart(simulation);     
-        // const addNodeTimer = (i = 2) => {
-        //     setTimeout(() => {
-        //         chrome.runtime.sendMessage({type: "addNode", data: i, nodes: this.nodes, links: this.links}, ([nodes, links]) => {
-        //             this.setNodesAndLinks(nodes, links);
-        //             restart(simulation);
-        //             if (i < 1000) {
-        //                 addNodeTimer(i + 1);
-        //             }
-        //         });
-        //     }, 2000)
-        // }
-        // addNodeTimer();
+        restart(simulation);
 
         function ticked() {
             node.attr('transform', (d: any) => `translate(${d.x}, ${d.y})`)

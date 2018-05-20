@@ -1,7 +1,13 @@
 import HistoryGraphNode from './HistoryGraphNode';
 import * as d3 from 'd3';
 import { SimulationNodeDatum } from 'd3';
+import {Page} from './Page';
+import {GraphLink} from './GraphLink';
+import {GraphNode} from './GraphNode';
 
+const allPages: {[url: string]: Page} = {};
+const allNodes: {[id: number]: GraphNode} = {};
+const allLinks: {[id: number]: GraphLink} = {};
 
 
 let nodes: HistoryGraphNode[] = [];
@@ -52,7 +58,7 @@ function addNode(i: number) {
           data: {
               name: suggestion
           },
-          index: nodes.length,
+          index: 0, // nodes.length,
           isSuggestion: true,
           next: null,
           suggestions: [],
@@ -92,7 +98,6 @@ function deleteNode(d) {
 // for (let i = 0; i < 2; i++) {
 //   addNode(i);
 // }
-
 
 function addPageNode(title, suggestions) {
     const n: HistoryGraphNode = {
