@@ -43,6 +43,12 @@ class HistoryGraphView extends React.Component {
       })
     }
 
+    public handleChangeHistory(evt) {
+        const title = evt.target.value;
+        console.log('CHANGING HISTORY', title);
+        chrome.runtime.sendMessage({type: 'loadHistory', name: title});
+    }
+
     public loadGraph() {
         const svg = d3.select(this.ref);
         const    width = +svg.attr("width");
@@ -51,7 +57,7 @@ class HistoryGraphView extends React.Component {
         const simulation = d3.forceSimulation(this.nodes)
             .force("charge", d3.forceManyBody().strength(-200).distanceMax(200))
             .force("link", d3.forceLink(this.links).distance(50).strength(0.5))
-            .force("y", d3.forceY((d: any) => 100))// d.isSuggestion? d.y: 0))
+            .force("y", d3.forceY((d: any) => 100).strength(d => d.isSuggestion? 0: 1))// d.isSuggestion? d.y: 0))
             .alphaTarget(1)
             .on("tick", ticked)
         const g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
@@ -193,7 +199,7 @@ class HistoryGraphView extends React.Component {
             showSearch
             placeholder="Select a History"
             style={{ width: "10%", right: "10px", position: "absolute", marginTop: "3px" }}
-            onChange={() => {}}>
+            onChange={this.handleChangeHistory}>
             {this.state.histories.map((history) => {
               return <Select.Option value={history.name} key={history.id}>{history.name}</Select.Option>
             })}

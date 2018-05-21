@@ -32,6 +32,15 @@ chrome.runtime.onMessage.addListener(
             history: name,
             nodes: historyGraph.toJSON()
         })
+    } else if (request.type === 'loadHistory') {
+        const name = request.name;
+        axios.get('http://localhost:3005/api/history', {params: {query: name}})
+        .then(res => {
+            historyGraph.fromJSON(res.data);
+        })
+        .catch(err => {
+            console.log('ERROR LOADING HISTORY', err);
+        })
     }
 });
 
