@@ -4,6 +4,7 @@ import * as React from 'react';
 import './App.css';
 import GraphNode from './GraphNode';
 import * as io from 'socket.io-client';
+import { Affix } from 'antd';
 
 class HistoryGraphView extends React.Component {
 
@@ -135,9 +136,11 @@ class HistoryGraphView extends React.Component {
 
   public render() {
     return (
+      <Affix offsetBottom={0}>
       <div className="App" id="footer">
         <svg width="960" height="500"  ref={(ref: SVGSVGElement) => this.ref = ref}/>
       </div>
+      </Affix>
     );
   }
 
