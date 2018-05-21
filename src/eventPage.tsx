@@ -10,13 +10,6 @@ import axios from 'axios';
 
 const historyGraph = new HistoryGraph();
 
-// const socket = io.connect('http://localhost:3005');
-
-// socket.on('graphData', (data) => {
-//   console.log('user connected', data);
-// })
-// socket.emit('ext', 'hello');
-
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     console.log(request);
