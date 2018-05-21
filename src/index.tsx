@@ -10,5 +10,5 @@ app.id = 'root';
 const doc: any = document.body;
 doc.append(app);
 
-reactDom.render(<Floater data={GraphData} width={2500} height={200}/>, document.getElementById('root'));
+reactDom.render(<HistoryGraphView />, document.getElementById('root'));
 

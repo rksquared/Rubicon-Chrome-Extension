@@ -20,10 +20,19 @@ class Floater extends React.Component<IProps, { toggle: boolean, histories: any,
     console.log(this.state.input);
   }
 
-  private ctrls: IRefs = {};
-  private force: any;
   public state = { toggle: true, histories: [], input: '' };
 
+  public getUserGraphs() {
+    axios.get('http://localhost:3005/api/histories')
+    .then((result: any) => {
+      this.setState({ histories: result.data });
+    })
+    .catch((err: any) => {
+      console.log(err);
+    })
+  }
+  private ctrls: IRefs = {};
+  private force: any;
 
   public componentDidMount() {
     this.getUserGraphs();
@@ -82,16 +91,6 @@ class Floater extends React.Component<IProps, { toggle: boolean, histories: any,
         node.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
       });
     }
-  }
-
-  public getUserGraphs() {
-    axios.get('http://localhost:3005/api/histories')
-    .then((result: any) => {
-      this.setState({ histories: result.data });
-    })
-    .catch((err: any) => {
-      console.log(err);
-    })
   }
 
   public render() {
