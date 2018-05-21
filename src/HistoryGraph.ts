@@ -9,7 +9,6 @@ class HistoryGraph {
     nodes: Array<HistoryNode | SuggestionNode> = [];
     lastHistoryNode: HistoryNode | null = null;
     nextNodeId: number = 0;
-    nextLinkId: number = 0;
 
     constructor() {
     }
@@ -30,6 +29,8 @@ class HistoryGraph {
         for (const url of ['www.google.com', 'www.stackoverflow.com', 'wikipedia.org']) {
             this.addSuggestion(historyNode, url, url);
         }
+        console.log(this.toJSON());
+        this.fromJSON(this.toJSON());
     }
 
     addSuggestion(anchor, url, title) {
@@ -44,11 +45,10 @@ class HistoryGraph {
     }
 
     deleteNode(id: number): void {
-        const node: any = this.nodes[id];
-        console.log('DELETING', id, node);
+        const node: any = this.nodes.filter(n => n.id === id)[0];
         if (node.isSuggestion) {
             const a = node.anchor;
-            delete a.suggestions[(a.suggestions.indexOf(node))];
+            delete a.suggestions[a.suggestions.indexOf(node)];
         } else {
             if (node.prev !== null) {
                 node.prev.next = node.next;
@@ -60,10 +60,10 @@ class HistoryGraph {
                 this.lastHistoryNode = node.prev;
             }
             node.suggestions.forEach(suggestion => {
-                delete this.nodes[suggestion.id];
+                delete this.nodes[this.nodes.indexOf(suggestion)];
             })
         }
-        delete this.nodes[id];
+        this.nodes = this.nodes.filter(n => n.id !== id);
     }
 
     generateGraph(): {nodes: {[id: string]: GraphNode}, links: GraphLink[]} {
@@ -87,6 +87,53 @@ class HistoryGraph {
             }
         })
         return {nodes: nodes, links: links}
+    }
+
+    toJSON() {
+        return JSON.stringify(this.nodes.map((node: any) => ({
+            data: node.page,
+            id: node.id,
+            isSuggestion: node.isSuggestion,
+            suggestions: node.isSuggestion? null: node.suggestions.map(n => n.id),
+            next: node.isSuggestion? null: (node.next === null? null: node.next.id),
+            prev: node.isSuggestion? null: (node.prev === null? null: node.prev.id),
+            anchor: node.isSuggestion? node.anchor.id: null
+        })));
+    }
+
+    fromJSON(json) {
+        const nodes = JSON.parse(json);
+        if (nodes.indexOf(null) !== -1) console.log('ERROR NULL');
+        const nodeDict = {};
+        const historyNodes = nodes.filter((n: any) => !n.isSuggestion);
+        const suggestionNodes = nodes.filter((n: any) => n.isSuggestion);
+        nodes.forEach((n: any) => {
+            this.pages[n.data.url] = n.data;
+            this.nextNodeId = Math.max(this.nextNodeId, n.id);
+        })
+        historyNodes.forEach((n: any) => {
+            const newNode = new HistoryNode(n.data, null, n.id);
+            nodeDict[n.id] = newNode;
+        })
+        historyNodes.forEach((n: any) => {
+            if (n.next !== null) {
+                nodeDict[n.id].next = nodeDict[n.next];
+                nodeDict[n.next].prev = nodeDict[n.id];
+            } else {
+                this.lastHistoryNode = nodeDict[n.id];
+            }
+            if (n.prev !== null) {
+                nodeDict[n.id].prev = nodeDict[n.prev];
+                nodeDict[n.prev].next = nodeDict[n.id];
+            }
+        })
+        suggestionNodes.forEach((n: any) => {
+            const newNode = new SuggestionNode(this.pages[n.data.url], nodeDict[n.anchor], n.id);
+            nodeDict[n.id] = newNode;
+            nodeDict[n.anchor].suggestions.push(nodeDict[n.id])
+        })
+        console.log('NODES', Object.keys(nodeDict).map(n => nodeDict[n]));
+        this.nodes =  Object.keys(nodeDict).map(n => nodeDict[n]);
     }
 }
 
