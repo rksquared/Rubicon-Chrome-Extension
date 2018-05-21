@@ -32,7 +32,7 @@
   ],
 
   "background": {
-    "scripts": ["js/eventPage.js", "js/auth.js"],
+    "scripts": ["socket.io.js", "js/eventPage.js", "js/auth.js"],
     "persistent": true
   },
 

@@ -7,9 +7,9 @@ chrome.browserAction.onClicked.addListener(function() {
 window.onload = () => {
   const socket = io('http://localhost:3005');
 
-  socket.on('connect', (data) => {
+  socket.on('graphData', (data) => {
     console.log(data);
-    socket.on('graphData', console.log)
+    //socket.on('graphData', console.log)
   })
 
 }
