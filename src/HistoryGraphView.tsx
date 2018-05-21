@@ -2,13 +2,13 @@ import * as d3 from 'd3';
 import { SimulationNodeDatum } from 'd3';
 import * as React from 'react';
 import './App.css';
-import HistoryGraphNode from './HistoryGraphNode';
+import GraphNode from './GraphNode';
 import * as io from 'socket.io-client';
 
 class HistoryGraphView extends React.Component {
 
     private ref: SVGSVGElement;
-    private nodes: HistoryGraphNode[] = [];
+    private nodes: GraphNode[] = [];
     private links: Array<{source: SimulationNodeDatum, target: SimulationNodeDatum}> = [];
     public socket = io('http://localhost:3005');
 
@@ -24,7 +24,7 @@ class HistoryGraphView extends React.Component {
         const simulation = d3.forceSimulation(this.nodes)
             .force("charge", d3.forceManyBody().strength(-200).distanceMax(200))
             .force("link", d3.forceLink(this.links).distance(50).strength(0.5))
-            .force("y", d3.forceY((d: any) => d.isSuggestion? d.y: 0))
+            .force("y", d3.forceY((d: any) => 0))// d.isSuggestion? d.y: 0))
             .alphaTarget(1)
             .on("tick", ticked)
         const g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
@@ -42,7 +42,7 @@ class HistoryGraphView extends React.Component {
             node.append("text")
                 .attr("dx", 12)
                 .attr("dy", ".35em")
-                .text((d: any) => d.data.name);
+                .text((d: any) => d.data.title);
 
             node.append("image")
                 .attr("xlink:href", "https://github.com/favicon.ico")
@@ -51,10 +51,24 @@ class HistoryGraphView extends React.Component {
                 .attr("width", 20)
                 .attr("height", 20)
             node.on('click', (d: any) => {
-                    chrome.runtime.sendMessage({type: "deleteNode", data: d, nodes: this.nodes, links: this.links}, ([nodes, links]) => {
-                        this.setNodesAndLinks(nodes, links);
-                        restart(simulation);
-                    });
+                    chrome.runtime.sendMessage({type: "deleteNode", id: d.id})
+                    // TODO: DELETE THE NODE
+                    // throw('error');
+                    this.nodes = this.nodes.filter(n => (n.id !== d.id) && n.anchorId !== d.id);
+                    this.links = this.links.filter((link: any) => link.source.id !== d.id && link.target.id !== d.id);
+                    this.nodes = this.nodes.filter(n => n.anchorId !== n.id);
+                    if (!d.isSuggestion) {
+                        const next = this.nodes.filter(n => n.prevId === d.id)[0];
+                        const prev = this.nodes.filter(n => n.id === d.prevId)[0];
+                        if (next !== undefined && prev !== undefined) {
+                            next.prevId = prev.id;
+                            this.links.push({
+                                source: prev,
+                                target: next
+                            })
+                        }
+                    }
+                    restart(simulation);
                 })
                     node.call(d3.drag()
                         .on("start", dragstarted)
@@ -112,8 +126,9 @@ class HistoryGraphView extends React.Component {
     }
 
     public componentDidMount() {
-        chrome.runtime.sendMessage({type: "getNodesAndLinks", nodes: this.nodes, links: this.links}, ([nodes, links]) => {
-            this.setNodesAndLinks(nodes, links);
+        chrome.runtime.sendMessage({type: "getNodesAndLinks"}, (response) => {
+            console.log('THIS', response);
+            this.setNodesAndLinks(response.nodes, response.links);
             this.loadGraph();
         });          
     }
@@ -126,18 +141,15 @@ class HistoryGraphView extends React.Component {
     );
   }
 
-  private setNodesAndLinks(nodes, links) {
-    this.nodes = nodes;
-    const nodeDict = {};
-    for (const n of this.nodes) {
-        nodeDict[n.data.name] = n;
-    }
-    this.links = links;
-    for (let i = 0; i < this.links.length; i++) {
-        const link: any = this.links[i]
-        link.source = nodeDict[link.source.data.name];
-        link.target = nodeDict[link.target.data.name];
-    }
+  private setNodesAndLinks(nodes: {[id: string]: GraphNode}, links: Array<{source: number, target: number}>) {
+    this.nodes = Object.keys(nodes).map(id => nodes[id]);
+    // const nodeDict = {};
+
+    // for (const n of this.nodes) {
+    //     nodeDict[n.data.name] = n;
+    // }
+    this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
+    console.log('NODES', this.nodes, 'LINKS', this.links);
   }
 }
 
