@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as io from 'socket.io-client';
 
 interface User {
   id: string,

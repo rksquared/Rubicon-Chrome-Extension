@@ -33,7 +33,7 @@
 
   "background": {
     "scripts": ["js/eventPage.js", "js/auth.js"],
-    "persistent": false
+    "persistent": true
   },
 
   "permissions": [

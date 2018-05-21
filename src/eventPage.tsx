@@ -4,6 +4,7 @@ import { SimulationNodeDatum } from 'd3';
 import {Page} from './Page';
 import {GraphLink} from './GraphLink';
 import {GraphNode} from './GraphNode';
+import * as io from 'socket.io-client';
 
 const allPages: {[url: string]: Page} = {};
 const allNodes: {[id: number]: GraphNode} = {};
@@ -14,6 +15,13 @@ let nodes: HistoryGraphNode[] = [];
 let links: Array<{source: SimulationNodeDatum, target: SimulationNodeDatum}> = [];
 
 console.log(nodes);
+
+const socket = io.connect('http://localhost:3005');
+
+socket.on('graphData', (data) => {
+  console.log('user connected', data);
+})
+socket.emit('ext', 'hello');
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {

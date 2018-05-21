@@ -3,12 +3,14 @@ import { SimulationNodeDatum } from 'd3';
 import * as React from 'react';
 import './App.css';
 import HistoryGraphNode from './HistoryGraphNode';
+import * as io from 'socket.io-client';
 
 class HistoryGraphView extends React.Component {
 
     private ref: SVGSVGElement;
     private nodes: HistoryGraphNode[] = [];
     private links: Array<{source: SimulationNodeDatum, target: SimulationNodeDatum}> = [];
+    public socket = io('http://localhost:3005');
 
     constructor(props: any) {
         super(props);
