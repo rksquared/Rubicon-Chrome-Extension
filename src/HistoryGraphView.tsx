@@ -174,7 +174,7 @@ class HistoryGraphView extends React.Component {
     const show = (
       <>
         <div style={{ boxShadow: "0 -1px 8px 0 rgba(107, 104, 104, 0.2), 0 -1px 20px 0 rgba(80, 79, 79, 0.19)", backgroundColor: "#f65d5d", paddingBottom: "10px", paddingTop: "3px", position: "relative", height: "45px" }}>
-        <Button type="primary" shape="circle" icon="shrink" style={{ float: "left", marginLeft: "5px" }} onClick={ this.handleToggle.bind(this) }></Button>
+        <Button type="primary" shape="circle" icon="shrink" style={{ marginTop: "3px", float: "left", marginLeft: "5px" }} onClick={ this.handleToggle.bind(this) }></Button>
         <Form layout="inline" onSubmit={() => {}}>
           <Form.Item>
             <span>
