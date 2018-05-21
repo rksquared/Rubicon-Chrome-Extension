@@ -81,7 +81,7 @@ class HistoryGraph {
                 anchorId: node.isSuggestion? node.anchor.id: null,
                 isSuggestion: node.isSuggestion,
                 x: i * 50 - 25 * (this.nodes.length),
-                y: 0,
+                y: 100,
                 vx: 0,
                 vy: 0
             }

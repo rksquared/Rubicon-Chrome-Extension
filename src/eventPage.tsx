@@ -6,6 +6,7 @@ import GraphLink from './GraphLink';
 import GraphNode from './GraphNode';
 import * as io from 'socket.io-client';
 import HistoryGraph from './HistoryGraph';
+import axios from 'axios';
 
 const historyGraph = new HistoryGraph();
 
@@ -25,6 +26,12 @@ chrome.runtime.onMessage.addListener(
         const res = historyGraph.generateGraph();
         console.log(res);
         sendResponse(res);
+    } else if (request.type === 'saveHistory') {
+        const name = request.name;
+        axios.post('http://localhost:3005/api/history', {
+            history: name,
+            nodes: historyGraph.toJSON()
+        })
     }
 });
 

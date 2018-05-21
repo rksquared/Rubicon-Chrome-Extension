@@ -30,7 +30,7 @@ class HistoryGraphView extends React.Component {
 
     public handleFormSubmit(ev) {
       ev.preventDefault();
-      console.log(this.state.input);
+      chrome.runtime.sendMessage({type: "saveHistory", name: this.state.input})
     }
 
     public getUserGraphs() {
@@ -51,7 +51,7 @@ class HistoryGraphView extends React.Component {
         const simulation = d3.forceSimulation(this.nodes)
             .force("charge", d3.forceManyBody().strength(-200).distanceMax(200))
             .force("link", d3.forceLink(this.links).distance(50).strength(0.5))
-            .force("y", d3.forceY((d: any) => 0))// d.isSuggestion? d.y: 0))
+            .force("y", d3.forceY((d: any) => 100))// d.isSuggestion? d.y: 0))
             .alphaTarget(1)
             .on("tick", ticked)
         const g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
@@ -165,7 +165,7 @@ class HistoryGraphView extends React.Component {
     const width = 2500;
     const height = 200;
     const style = {
-      backgroundColor: 'rgb(255, 255, 255)',
+    //   backgroundColor: 'rgb(255, 255, 255, 0)',
       height,
       width,
       marginBottom: "-8px"
