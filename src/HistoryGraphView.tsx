@@ -173,7 +173,7 @@ class HistoryGraphView extends React.Component {
 
     const show = (
       <>
-        <div style={{ backgroundColor: "#f65d5d", paddingBottom: "5px", paddingTop: "5px", position: "relative", height: "45px" }}>
+        <div style={{ boxShadow: "0 -1px 8px 0 rgba(107, 104, 104, 0.2), 0 -1px 20px 0 rgba(80, 79, 79, 0.19)", backgroundColor: "#f65d5d", paddingBottom: "10px", paddingTop: "3px", position: "relative", height: "45px" }}>
         <Button type="primary" shape="circle" icon="shrink" style={{ float: "left", marginLeft: "5px" }} onClick={ this.handleToggle.bind(this) }></Button>
         <Form layout="inline" onSubmit={() => {}}>
           <Form.Item>
@@ -192,7 +192,7 @@ class HistoryGraphView extends React.Component {
           <Select           
             showSearch
             placeholder="Select a History"
-            style={{ width: "10%", right: "10px", position: "absolute" }}
+            style={{ width: "10%", right: "10px", position: "absolute", marginTop: "3px" }}
             onChange={() => {}}>
             {this.state.histories.map((history) => {
               return <Select.Option value={history.name} key={history.id}>{history.name}</Select.Option>
