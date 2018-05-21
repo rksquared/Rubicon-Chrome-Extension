@@ -17,14 +17,19 @@ window.onload = function() {
       
       axios.post('http:localhost:3005/api/chromeSession', { id })
       .then((res: any) => {
-        console.log('session:', res);
+        console.log(res);
       })
-      
     })
     .catch((err: any) => {
       console.log(err);
     })
   });  
 };
+
+var socket = io.connect('http://localhost:3005');
+socket.on("graphData", (data) => {
+    console.log(data);
+    //chrome.runtime.sendMessage({msg:"socket",text:data.text},function(response){});
+});
 
 export default user;

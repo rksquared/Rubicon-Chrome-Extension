@@ -4,6 +4,8 @@ import * as React from 'react';
 import './App.css';
 import GraphNode from './GraphNode';
 import * as io from 'socket.io-client';
+import { Affix, Button, Select, Input, Form } from 'antd';
+import axios from 'axios';
 
 class HistoryGraphView extends React.Component {
 
@@ -14,6 +16,31 @@ class HistoryGraphView extends React.Component {
 
     constructor(props: any) {
         super(props);
+    }
+
+    public state = { toggle: true, histories: [], input: '' };
+
+    public handleToggle() {
+      this.setState({ toggle: !this.state.toggle });
+    }
+
+    public handleInputChange(e) {
+      this.setState({ input: e.target.value });
+    }
+
+    public handleFormSubmit(ev) {
+      ev.preventDefault();
+      console.log(this.state.input);
+    }
+
+    public getUserGraphs() {
+      axios.get('http://localhost:3005/api/histories')
+      .then((result: any) => {
+        this.setState({ histories: result.data });
+      })
+      .catch((err: any) => {
+        console.log(err);
+      })
     }
 
     public loadGraph() {
@@ -130,15 +157,58 @@ class HistoryGraphView extends React.Component {
             console.log('THIS', response);
             this.setNodesAndLinks(response.nodes, response.links);
             this.loadGraph();
-        });          
+        });      
+        this.getUserGraphs();    
     }
 
   public render() {
+    const width = 2500;
+    const height = 200;
+    const style = {
+      backgroundColor: 'rgb(255, 255, 255)',
+      height,
+      width,
+      marginBottom: "-8px"
+    };
+
+    const show = (
+      <>
+        <div style={{ boxShadow: "0 -1px 8px 0 rgba(107, 104, 104, 0.2), 0 -1px 20px 0 rgba(80, 79, 79, 0.19)", backgroundColor: "#f65d5d", paddingBottom: "10px", paddingTop: "3px", position: "relative", height: "45px" }}>
+        <Button type="primary" shape="circle" icon="shrink" style={{ marginTop: "3px", float: "left", marginLeft: "5px" }} onClick={ this.handleToggle.bind(this) }></Button>
+        <Form layout="inline" onSubmit={() => {}}>
+          <Form.Item>
+            <span>
+              <Input
+                type="text"
+                onChange={ this.handleInputChange.bind(this) }
+                placeholder="History Name"
+                style={{ width: '65%', marginLeft: "10px" }}
+              />
+            </span>
+          </Form.Item>
+          <Form.Item>
+            <Button onClick={ this.handleFormSubmit.bind(this) } style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit">Save</Button>
+          </Form.Item>
+          <Select           
+            showSearch
+            placeholder="Select a History"
+            style={{ width: "10%", right: "10px", position: "absolute", marginTop: "3px" }}
+            onChange={() => {}}>
+            {this.state.histories.map((history) => {
+              return <Select.Option value={history.name} key={history.id}>{history.name}</Select.Option>
+            })}
+          </Select>
+        </Form>
+        </div>
+        <svg style={style}  ref={(ref: SVGSVGElement) => this.ref = ref}/>
+      </>
+      );
+
     return (
-      <div className="App" id="footer">
-        <svg width="960" height="500"  ref={(ref: SVGSVGElement) => this.ref = ref}/>
-      </div>
-    );
+      <Affix offsetBottom={0}>
+        {this.state.toggle ? show : <Button type="primary" shape="circle" icon="arrows-alt" onClick={ this.handleToggle.bind(this) }></Button>}
+      </Affix>
+      );
   }
 
   private setNodesAndLinks(nodes: {[id: string]: GraphNode}, links: Array<{source: number, target: number}>) {

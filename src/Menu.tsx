@@ -11,6 +11,11 @@ interface IgraphState {
 }
 
 class Menu extends React.Component<{}, IgraphState> {
+
+  constructor(props) {
+    super(props);
+  }
+
   state: IgraphState = { histories: [] };
 
   componentDidMount() {
@@ -21,7 +26,6 @@ class Menu extends React.Component<{}, IgraphState> {
     axios.get('http://localhost:3005/api/histories')
     .then((result: any) => {
       this.setState({ histories: result.data });
-      console.log(result);
     })
     .catch((err: any) => {
       console.log(err);
