@@ -30,7 +30,9 @@ class HistoryGraphView extends React.Component {
 
   public handleFormSubmit(ev) {
     ev.preventDefault();
-    chrome.runtime.sendMessage({type: "saveHistory", name: this.state.input})
+    chrome.runtime.sendMessage({type: "saveHistory", name: this.state.input}, () => {
+      alert('saved ' + ev);
+    })
   }
 
   public getUserGraphs() {
@@ -43,13 +45,21 @@ class HistoryGraphView extends React.Component {
     })
   }
 
-  public handleChangeHistory(evt) {
+  public handleChangeHistory = (evt) => {
       const title = evt;
       console.log('CHANGING HISTORY', title);
-      chrome.runtime.sendMessage({type: 'loadHistory', name: title});
+      chrome.runtime.sendMessage({type: 'loadHistory', name: title}, (response) => {
+        console.log({ response }, this.nodes);
+        
+        chrome.runtime.sendMessage({type: "getNodesAndLinks"}, (response) => {
+            this.setNodesAndLinks(response.nodes, response.links);
+            this.loadGraph();
+        });
+        
+      });
   }
 
-  public loadGraph() {
+  public loadGraph = () => {
       const svg = d3.select(this.ref);
       const    width = +svg.attr("width");
       const    height = +svg.attr("height");
@@ -162,7 +172,6 @@ class HistoryGraphView extends React.Component {
 
   public componentDidMount() {
       chrome.runtime.sendMessage({type: "getNodesAndLinks"}, (response) => {
-          console.log('THIS', response);
           this.setNodesAndLinks(response.nodes, response.links);
           this.loadGraph();
       });      
@@ -201,7 +210,7 @@ public render() {
           showSearch
           placeholder="Select a History"
           style={{ width: "10%", right: "10px", position: "absolute", marginTop: "3px" }}
-          onChange={this.handleChangeHistory}>
+          onChange={ this.handleChangeHistory.bind(this) }>
           {this.state.histories.map((history) => {
             return <Select.Option value={history.name} key={history.id}>{history.name}</Select.Option>
           })}

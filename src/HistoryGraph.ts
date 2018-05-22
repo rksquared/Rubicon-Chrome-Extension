@@ -10,9 +10,6 @@ class HistoryGraph {
     lastHistoryNode: HistoryNode | null = null;
     nextNodeId: number = 0;
 
-    constructor() {
-    }
-
     addPage (url, title): void {
         if (this.pages[url] === undefined) {
             this.pages[url] = new Page(url, title);
@@ -101,8 +98,7 @@ class HistoryGraph {
         })));
     }
 
-    fromJSON(json) {
-        const nodes = JSON.parse(json);
+    fromJSON(nodes) {
         if (nodes.indexOf(null) !== -1) console.log('ERROR NULL');
         const nodeDict = {};
         const historyNodes = nodes.filter((n: any) => !n.isSuggestion);
