@@ -62,7 +62,7 @@ class HistoryGraphView extends React.Component {
           .force("charge", d3.forceManyBody().strength(-200).distanceMax(200))
           .force("link", d3.forceLink(this.links).distance(50).strength(0.5))
           .force("y", d3.forceY((d: any) => 100).strength(d => d.isSuggestion? 0: 1))// d.isSuggestion? d.y: 0))
-          .force("x", d3.forceX(700))
+          .force("x", d3.forceX(700).strength(0.5))
           //.force('center', d3.forceCenter(width / 2, height / 2))
           .alphaTarget(1)
           .on("tick", ticked)
@@ -90,31 +90,36 @@ class HistoryGraphView extends React.Component {
               .attr("width", 20)
               .attr("height", 20)
           node.on('click', (d: any) => {
-                  chrome.runtime.sendMessage({type: "deleteNode", id: d.id})
-                  // TODO: DELETE THE NODE
-                  // throw('error');
-                  this.nodes = this.nodes.filter(n => (n.id !== d.id) && n.anchorId !== d.id);
-                  this.links = this.links.filter((link: any) => link.source.id !== d.id && link.target.id !== d.id);
-                  this.nodes = this.nodes.filter(n => n.anchorId !== n.id);
-                  if (!d.isSuggestion) {
-                      const next = this.nodes.filter(n => n.prevId === d.id)[0];
-                      const prev = this.nodes.filter(n => n.id === d.prevId)[0];
-                      if (next !== undefined && prev !== undefined) {
-                          next.prevId = prev.id;
-                          this.links.push({
-                              source: prev,
-                              target: next
-                          })
-                      }
-                  }
+                  window.location = d.data.url;
                   restart(simulation);
               })
+              node.on('contextmenu', (d: any) => {
+                d3.event.preventDefault();
+                chrome.runtime.sendMessage({type: "deleteNode", id: d.id})
+                // TODO: DELETE THE NODE
+                // throw('error');
+                this.nodes = this.nodes.filter(n => (n.id !== d.id) && n.anchorId !== d.id);
+                this.links = this.links.filter((link: any) => link.source.id !== d.id && link.target.id !== d.id);
+                this.nodes = this.nodes.filter(n => n.anchorId !== n.id);
+                if (!d.isSuggestion) {
+                    const next = this.nodes.filter(n => n.prevId === d.id)[0];
+                    const prev = this.nodes.filter(n => n.id === d.prevId)[0];
+                    if (next !== undefined && prev !== undefined) {
+                        next.prevId = prev.id;
+                        this.links.push({
+                            source: prev,
+                            target: next
+                        })
+                    }
+                }
+                restart(simulation);
+            })
                   node.call(d3.drag()
                       .on("start", dragstarted)
                       .on("drag", dragged)
                       .on("end", dragended))
                   
-                  // .on('mouseover', (d: any) => {
+                  // node.on('mouseover', (d: any) => {
                   //     d.mousedOver = true;
                   //     d3.select(this).empty
                   // })
