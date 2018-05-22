@@ -27,14 +27,14 @@ chrome.runtime.onMessage.addListener(
         const name = request.name;
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
-            console.log(res.data);
-            const data = JSON.stringify(res.data);
-            historyGraph.fromJSON(data);
+            historyGraph.fromJSON(res.data);
+            console.log('loading history');
+            sendResponse(res);
         })
         .catch(err => {
             console.log('ERROR LOADING HISTORY', err);
         })
-    }
+    } 
 });
 
 chrome.tabs.onCreated.addListener((tab) => {
