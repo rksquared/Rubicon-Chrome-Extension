@@ -12,12 +12,10 @@ const historyGraph = new HistoryGraph();
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    console.log(request);
     if (request.type === 'deleteNode') {
       historyGraph.deleteNode(request.id);
     } else if (request.type === "getNodesAndLinks") {
         const res = historyGraph.generateGraph();
-        console.log(res);
         sendResponse(res);
     } else if (request.type === 'saveHistory') {
         const name = request.name;
@@ -29,7 +27,9 @@ chrome.runtime.onMessage.addListener(
         const name = request.name;
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
-            historyGraph.fromJSON(res.data);
+            console.log(res.data);
+            const data = JSON.stringify(res.data);
+            historyGraph.fromJSON(data);
         })
         .catch(err => {
             console.log('ERROR LOADING HISTORY', err);
