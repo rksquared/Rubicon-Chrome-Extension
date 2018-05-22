@@ -45,7 +45,7 @@ class Floater extends React.Component<IProps, { toggle: boolean, histories: any,
         .nodes(data.nodes)
         .force('charge', d3.forceManyBody().strength(-120))
         .force('link', d3.forceLink(data.links).distance(50))
-        .force('center', d3.forceCenter(width / 2, height / 2));
+        //.force('center', d3.forceCenter(width / 2, height / 2));
 
       const svg = d3
         .select(this.ctrls.mountPoint)
@@ -97,7 +97,7 @@ class Floater extends React.Component<IProps, { toggle: boolean, histories: any,
     const { width, height } = this.props;
 
     const style = {
-      backgroundColor: 'rgb(255, 255, 255)',
+      backgroundColor: 'white',
       height,
       width
     };
