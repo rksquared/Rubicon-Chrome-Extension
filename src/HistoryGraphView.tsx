@@ -178,7 +178,20 @@ class HistoryGraphView extends React.Component {
   }
 
   public componentDidMount() {
-      this.loadHistory();
+      // this.loadHistory();
+      chrome.runtime.sendMessage({type: "addPage", url: window.location.href,
+       title: document.getElementsByTagName("title")[0].innerHTML}, (response) => {
+        const nodes = response.nodes;
+        const links = response.links;
+        this.nodes = Object.keys(nodes).map(id => nodes[id]);
+        this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
+        if (this.restart !== null) {
+          this.restart();
+        } else {
+          this.loadGraph();
+        }
+      });
+
       this.getUserGraphs();    
   }
 

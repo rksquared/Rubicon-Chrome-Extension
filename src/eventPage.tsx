@@ -43,6 +43,11 @@ chrome.runtime.onMessage.addListener(
         return true;
     } else if (request.type === 'clearHistory') {
         sendResponse('clearing');
+    } else if (request.type === 'addPage') {
+        const url = request.url;
+        const title = request.title;
+        historyGraph.addPage(url, title);
+        sendResponse(historyGraph.generateGraph());
     }
 });
 
@@ -50,10 +55,12 @@ chrome.tabs.onCreated.addListener((tab) => {
     console.log('opened tab:', tab);
 })
   
-chrome.tabs.onUpdated.addListener((tabId, tabInfo, tab) => {
-    let url = tab.url;
-    let title = tab.title;
-    console.log('tabs updated: url', url, 'title', title);
-    if (tabInfo.status !== 'complete') return;
-    historyGraph.addPage(url, title);
-})
+
+
+// chrome.tabs.onUpdated.addListener((tabId, tabInfo, tab) => {
+//     let url = tab.url;
+//     let title = tab.title;
+//     console.log('tabs updated: url', url, 'title', title);
+//     if (tabInfo.status !== 'complete') return;
+//     historyGraph.addPage(url, title);
+// })
