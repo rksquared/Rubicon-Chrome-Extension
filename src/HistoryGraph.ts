@@ -26,8 +26,6 @@ class HistoryGraph {
         for (const url of ['www.google.com', 'www.stackoverflow.com', 'wikipedia.org']) {
             this.addSuggestion(historyNode, url, url);
         }
-        console.log(this.toJSON());
-        this.fromJSON(this.toJSON());
     }
 
     addSuggestion(anchor, url, title) {
@@ -74,6 +72,7 @@ class HistoryGraph {
             nodes[node.id] = {
                 data: node.page,
                 id: node.id,
+                index: node.id,
                 prevId: (node.isSuggestion? null: (node.prev === null? null: node.prev.id)),
                 anchorId: node.isSuggestion? node.anchor.id: null,
                 isSuggestion: node.isSuggestion,
@@ -89,7 +88,7 @@ class HistoryGraph {
     }
 
     toJSON() {
-        return JSON.parse(JSON.stringify(this.nodes.map((node: any) => ({
+        return (JSON.stringify(this.nodes.map((node: any) => ({
             data: node.page,
             id: node.id,
             isSuggestion: node.isSuggestion,

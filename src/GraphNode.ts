@@ -8,6 +8,7 @@ class GraphNode implements SimulationNodeDatum {
     anchorId: number | null;
     isSuggestion: boolean;
     id: number;
+    index: number;
     x: number;
     y: number;
     vx: number;

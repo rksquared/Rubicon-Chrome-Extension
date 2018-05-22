@@ -12,6 +12,7 @@ class HistoryGraphView extends React.Component {
   private ref: SVGSVGElement;
   private nodes: GraphNode[] = [];
   private links: Array<{source: SimulationNodeDatum, target: SimulationNodeDatum}> = [];
+  private restart: any = null; // is reset to restart function once simulation is loaded
   public socket = io('http://localhost:3005');
 
   constructor(props: any) {
@@ -47,15 +48,14 @@ class HistoryGraphView extends React.Component {
 
   public handleChangeHistory = (evt) => {
       const title = evt;
-      console.log('CHANGING HISTORY', title);
-      chrome.runtime.sendMessage({type: 'loadHistory', name: title}, (response) => {
-        console.log({ response }, this.nodes);
-        
+      chrome.runtime.sendMessage({type: 'loadHistory', name: title}, (response) => {        
         chrome.runtime.sendMessage({type: "getNodesAndLinks"}, (response) => {
+          console.log('RECEIVED NODES', response);
             this.setNodesAndLinks(response.nodes, response.links);
-            this.loadGraph();
+            if (this.restart !== null) {
+              this.restart();
+            }
         });
-        
       });
   }
 
@@ -139,6 +139,8 @@ class HistoryGraphView extends React.Component {
       }
 
       restart(simulation);
+
+      this.restart = restart.bind(this, simulation);
 
       function ticked() {
           node.attr('transform', (d: any) => `translate(${d.x}, ${d.y})`)
