@@ -16,6 +16,7 @@ chrome.runtime.onMessage.addListener(
     if (request.type === 'deleteNode') {
       historyGraph.deleteNode(request.id);
     } else if (request.type === "getNodesAndLinks") {
+        console.log('getting nodes and links');
         const res = historyGraph.generateGraph();
         sendResponse(res);
     } else if (request.type === 'saveHistory') {
@@ -27,18 +28,22 @@ chrome.runtime.onMessage.addListener(
         })
     } else if (request.type === 'loadHistory') {
         const name = request.name;
+        console.log('loading, history name:', name)
+
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
             currentHistory = name;
             historyGraph = new HistoryGraph();
             historyGraph.fromJSON(res.data);
-            console.log('loading history');
-            sendResponse(res);
+            sendResponse({ res: 'gotIt' });
         })
         .catch(err => {
             console.log('ERROR LOADING HISTORY', err);
         })
-    } 
+        return true;
+    } else if (request.type === 'clearHistory') {
+        sendResponse('clearing');
+    }
 });
 
 chrome.tabs.onCreated.addListener((tab) => {
