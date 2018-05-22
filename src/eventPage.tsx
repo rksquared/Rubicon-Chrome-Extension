@@ -9,6 +9,7 @@ import HistoryGraph from './HistoryGraph';
 import axios from 'axios';
 
 let historyGraph = new HistoryGraph();
+let currentHistory = null;
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -19,6 +20,7 @@ chrome.runtime.onMessage.addListener(
         sendResponse(res);
     } else if (request.type === 'saveHistory') {
         const name = request.name;
+        currentHistory = name;
         axios.post('http://localhost:3005/api/history', {
             history: name,
             nodes: historyGraph.toJSON()
@@ -27,6 +29,7 @@ chrome.runtime.onMessage.addListener(
         const name = request.name;
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
+            currentHistory = name;
             historyGraph = new HistoryGraph();
             historyGraph.fromJSON(res.data);
             console.log('loading history');
