@@ -55,7 +55,8 @@ class HistoryGraphView extends React.Component {
 
   public handleClear() {
     chrome.runtime.sendMessage({type: 'clearHistory'}, (resp) => {
-      console.log({resp});
+      console.log({this: this});
+      this.loadHistory();
     })
   }
 
@@ -222,7 +223,7 @@ public render() {
         </Form.Item>
         <Form.Item>
           <Button onClick={ this.handleFormSubmit.bind(this) } style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit">Save</Button>
-          <Button onClick={ this.handleClear }>Clear</Button>
+          <Button onClick={ this.handleClear.bind(this) } style={{ marginLeft: "2px", marginBottom: "5px" }} >Clear</Button>
         </Form.Item>
         <Select           
           showSearch
@@ -252,6 +253,7 @@ public render() {
       const links = response.links;
       this.nodes = Object.keys(nodes).map(id => nodes[id]);
       this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
+      console.log('nodes in loadHistory', this.nodes);
       if (this.restart !== null) {
         this.restart();
       } else {

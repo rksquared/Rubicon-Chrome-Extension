@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(
     if (request.type === 'deleteNode') {
       historyGraph.deleteNode(request.id);
     } else if (request.type === "getNodesAndLinks") {
-        console.log('getting nodes and links');
+        console.log('getting nodes and links', historyGraph);
         const res = historyGraph.generateGraph();
         sendResponse(res);
     } else if (request.type === 'saveHistory') {
@@ -42,7 +42,8 @@ chrome.runtime.onMessage.addListener(
         })
         return true;
     } else if (request.type === 'clearHistory') {
-        sendResponse('clearing');
+        historyGraph = new HistoryGraph();
+        sendResponse({'clearing': 'clearing'});
     } else if (request.type === 'addPage') {
         const url = request.url;
         const title = request.title;
