@@ -8,7 +8,7 @@ import * as io from 'socket.io-client';
 import HistoryGraph from './HistoryGraph';
 import axios from 'axios';
 
-const historyGraph = new HistoryGraph();
+let historyGraph = new HistoryGraph();
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -27,6 +27,7 @@ chrome.runtime.onMessage.addListener(
         const name = request.name;
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
+            historyGraph = new HistoryGraph();
             historyGraph.fromJSON(res.data);
             console.log('loading history');
             sendResponse(res);

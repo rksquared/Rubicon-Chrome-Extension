@@ -83,11 +83,13 @@ class HistoryGraph {
                 vy: 0
             }
         })
+        
+        console.log({nodes: nodes, links: links});
         return {nodes: nodes, links: links}
     }
 
     toJSON() {
-        return JSON.stringify(this.nodes.map((node: any) => ({
+        return JSON.parse(JSON.stringify(this.nodes.map((node: any) => ({
             data: node.page,
             id: node.id,
             isSuggestion: node.isSuggestion,
@@ -95,7 +97,7 @@ class HistoryGraph {
             next: node.isSuggestion? null: (node.next === null? null: node.next.id),
             prev: node.isSuggestion? null: (node.prev === null? null: node.prev.id),
             anchor: node.isSuggestion? node.anchor.id: null
-        })));
+        }))));
     }
 
     fromJSON(nodes) {
