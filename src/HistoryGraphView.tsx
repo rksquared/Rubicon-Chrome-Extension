@@ -23,7 +23,7 @@ class HistoryGraphView extends React.Component {
   public state = { toggle: true, histories: [], input: '', currentHistory: '', onHistory: false };
 
   public handleToggle() {
-    this.setState({ toggle: !this.state.toggle });
+    this.loadHistory(() => this.setState({ toggle: !this.state.toggle }));
   }
 
   public handleInputChange(e) {
@@ -232,7 +232,8 @@ class HistoryGraphView extends React.Component {
       backgroundColor: 'rgb(255, 255, 255)',
       height,
       width,
-      marginBottom: "-8px"
+      marginBottom: "-8px",
+      opacity: this.state.toggle ? 1 : 0
     };
 
     const inputForm = (<Input
@@ -244,7 +245,7 @@ class HistoryGraphView extends React.Component {
 
   const show = (
     <>
-      <div style={{ boxShadow: "0 -1px 8px 0 rgba(107, 104, 104, 0.2), 0 -1px 20px 0 rgba(80, 79, 79, 0.19)", backgroundColor: "#f65d5d", paddingBottom: "10px", paddingTop: "3px", position: "relative", height: "45px" }}>
+      <div style={{ boxShadow: "0 -1px 8px 0 rgba(107, 104, 104, 0.2), 0 -1px 20px 0 rgba(80, 79, 79, 0.19)", backgroundColor: "#f65d5d", paddingBottom: "10px", paddingTop: "3px", position: "relative", height: "45px", opacity: this.state.toggle ? 1 : 0 }}>
       <Button type="primary" shape="circle" icon="shrink" style={{ marginTop: "3px", float: "left", marginLeft: "5px" }} onClick={ this.handleToggle.bind(this) }></Button>
       <Form layout="inline">
         <Form.Item>
@@ -258,7 +259,7 @@ class HistoryGraphView extends React.Component {
           <Tooltip title={this.state.onHistory ? "Update \"" + this.state.onHistory + "\" History" : "Save History"}><Button onClick={ this.handleFormSubmit.bind(this) } shape="circle" icon={this.state.onHistory ? "reload" : "download"} style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit"></Button></Tooltip>
           <Tooltip title="Clear"><Button onClick={ this.handleClear.bind(this) } shape="circle" icon="close" style={{ marginLeft: "2px", marginBottom: "5px" }} ></Button></Tooltip>
         </Form.Item>
-        {this.state.onHistory ? <Tooltip title="Delete History"><Button type="default" shape="circle" icon="delete" style={{ marginTop: "3px", float: "right", right: "160px" }} onClick={ this.handleDelete.bind(this) }/></Tooltip> : null}
+        {this.state.onHistory ? <Tooltip title="Delete History"><Button type="default" shape="circle" icon="delete" style={{ marginTop: "3px", float: "left", left: "156px" }} onClick={ this.handleDelete.bind(this) }/></Tooltip> : null}
         <Select           
           showSearch
           placeholder="Select a History"
@@ -276,12 +277,13 @@ class HistoryGraphView extends React.Component {
 
   return (
     <Affix offsetBottom={0}>
-      {this.state.toggle ? show : <Button type="primary" shape="circle" icon="arrows-alt" onClick={ this.handleToggle.bind(this) }></Button>}
+      {show}
+      {!this.state.toggle && <Button type="primary" shape="circle" icon="arrows-alt" onClick={ this.handleToggle.bind(this) }></Button>}
     </Affix>
     );
   }
 
-  private loadHistory() {
+  private loadHistory(cb?: any) {
     chrome.runtime.sendMessage({type: "getNodesAndLinks"}, (response) => {
       const nodes = response.nodes;
       const links = response.links;
@@ -290,6 +292,7 @@ class HistoryGraphView extends React.Component {
       console.log('nodes in loadHistory', this.nodes);
       if (this.restart !== null) {
         this.restart();
+        if (cb) cb();
       } else {
         this.loadGraph();
       }
