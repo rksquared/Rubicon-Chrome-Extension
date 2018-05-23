@@ -85,33 +85,46 @@ class HistoryGraphView extends React.Component {
       const   color = d3.scaleOrdinal(d3.schemeCategory10);
       const simulation = d3.forceSimulation(this.nodes)
           .force("charge", d3.forceManyBody().strength(-200).distanceMax(200))
-          .force("link", d3.forceLink(this.links).distance(50).strength(0.5))
-          .force("y", d3.forceY((d: any) => 100).strength(d => d.isSuggestion? 0: 1))// d.isSuggestion? d.y: 0))
-          .force("x", d3.forceX(700).strength(0.5))
+          .force("link", d3.forceLink(this.links).distance((d: any) => d.target.isSuggestion ? 50 : 100).strength(0.5))
+          .force("y", d3.forceY((d: any) => 100).strength(d => d.isSuggestion? 0 : .5))// d.isSuggestion? d.y: 0))
+          .force("x", d3.forceX((d: any) => d.x).strength(d => d.isSuggestion? 0 : .5))
+          // .force("x", d3.forceX(window.innerWidth * .5).strength(0.1))
           //.force('center', d3.forceCenter(width / 2, height / 2))
-          .alphaTarget(0)
+          .alphaTarget(1)
           .on("tick", ticked)
-
       const g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-      let link = g.append("g").attr("stroke", "lightblue").attr("stroke-width", 1.5).selectAll(".link");
+      let link = g.append("g").attr("stroke", "lightblue").attr("stroke-width", 2).selectAll(".link");
       let node = g.selectAll('.node');
       const restart = (restartingSimulation: any) => {
           // Apply the general update pattern to the nodes.
           node = node.data(this.nodes, (d: any) => d.index);
           node.exit().remove();
           node = node.enter()
-              .append("g").attr("fill", (d: any) => color(d.index)) // ((d.mousedOver === true) || !d.isSuggestion)? color(d.index): 'grey')
+              .append("g")// ((d.mousedOver === true) || !d.isSuggestion)? color(d.index): 'grey')
               .attr("r", 8)
               .attr('transform', (d: any) => `translate(${d.x}, ${d.y})`)
               .merge(node);
-          node.append<SVGCircleElement>('circle')
-              .attr('r', 40)
-              .style('stroke', 'lightblue')
-              .style('stroke-width', 2)
-              .style('fill', "white")
+        node.append<SVGCircleElement>('circle')
+          .attr('r', 20)
+          .style('stroke', 'lightblue')
+          .style('stroke-width', 2)
+          .style('fill', "white")
+          .on("mouseenter", (d: any) => {
+            const { id } = d;
+
+            const selection = d3.selectAll('circle').filter((d: any) => d.id === id)
+            .style("fill", "lightblue");
+          })
+          .on("mouseleave", (d: any) => {
+            const { id } = d;
+
+            const selection = d3.selectAll('circle').filter((d: any) => d.id === id)
+            .style("fill", "white");
+          })
           node.append("text")
-              .attr("dx", -12)
+              .attr("dx", -20)
               .attr("dy", ".35em")
+              .attr("fill", (d: any) => color(d.index)) 
               .text((d: any) => d.data.title);
 
 
@@ -146,7 +159,6 @@ class HistoryGraphView extends React.Component {
                 }
                 restart(simulation);
             })
-
                   node.call(d3.drag()
                       .on("start", dragstarted)
                       .on("drag", dragged)
@@ -213,8 +225,10 @@ class HistoryGraphView extends React.Component {
      title: document.getElementsByTagName("title")[0].innerHTML}, (response) => {
       const nodes = response.nodes;
       const links = response.links;
+      console.log({nodes})
       this.nodes = Object.keys(nodes).map(id => nodes[id]);
       this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
+      Object.keys(nodes).forEach((n: any) => nodes[n].x += window.innerWidth * Object.keys(nodes).map((key: any) => nodes[key]).filter((node: any) => !node.isSuggestion).length / 10);
       if (this.restart !== null) {
         this.restart();
       } else {
@@ -236,12 +250,12 @@ class HistoryGraphView extends React.Component {
       opacity: this.state.toggle ? 1 : 0
     };
 
-    const inputForm = (<Input
-                      type="text"
-                      onChange={ this.handleInputChange.bind(this) }
-                      placeholder="History Name"
-                      style={{ width: '65%', marginLeft: "10px" }}
-                      />);
+  const inputForm = (<Input
+                    type="text"
+                    onChange={ this.handleInputChange.bind(this) }
+                    placeholder="History Name"
+                    style={{ width: '65%', marginLeft: "10px" }}
+                    />);
 
   const show = (
     <>
@@ -260,7 +274,8 @@ class HistoryGraphView extends React.Component {
           <Tooltip title="Clear"><Button onClick={ this.handleClear.bind(this) } shape="circle" icon="close" style={{ marginLeft: "2px", marginBottom: "5px" }} ></Button></Tooltip>
         </Form.Item>
         {this.state.onHistory ? <Tooltip title="Delete History"><Button type="default" shape="circle" icon="delete" style={{ marginTop: "3px", marginLeft: "-14px" }} onClick={ this.handleDelete.bind(this) }/></Tooltip> : null}
-        <Select           
+        <Select  
+          defaultValue={this.state.histories[0] ? this.state.histories[0].name : ""}         
           showSearch
           placeholder="Select a History"
           style={{ width: "10%", right: "10px", position: "absolute", marginTop: "3px" }}
@@ -288,8 +303,8 @@ class HistoryGraphView extends React.Component {
       const nodes = response.nodes;
       const links = response.links;
       this.nodes = Object.keys(nodes).map(id => nodes[id]);
+      Object.keys(nodes).forEach((n: any) => nodes[n].x += window.innerWidth * Object.keys(nodes).length / 10);
       this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
-      console.log('nodes in loadHistory', this.nodes);
       if (this.restart !== null) {
         this.restart();
         if (cb) cb();
@@ -301,3 +316,21 @@ class HistoryGraphView extends React.Component {
 }
 
 export default HistoryGraphView;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
