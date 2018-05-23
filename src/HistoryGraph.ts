@@ -82,7 +82,6 @@ class HistoryGraph {
             }
         })
         
-        console.log({nodes: nodes, links: links});
         return {nodes: nodes, links: links}
     }
 
@@ -133,7 +132,8 @@ class HistoryGraph {
     }
 
     pruneRecommendations() {
-        console.log(this.nodes);
+        const lastNode: any = this.nodes.filter((node: any) => !node.anchor && !node.next)[0];
+        this.nodes = this.nodes.filter((node: any) => node.anchor ? node.anchor.page.title === lastNode.page.title : true);
     }
 }
 

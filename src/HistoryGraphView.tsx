@@ -4,7 +4,7 @@ import * as React from 'react';
 import './App.css';
 import GraphNode from './GraphNode';
 import * as io from 'socket.io-client';
-import { Affix, Button, Select, Input, Form } from 'antd';
+import { Affix, Button, Select, Input, Form, Tag } from 'antd';
 import axios from 'axios';
 
 class HistoryGraphView extends React.Component {
@@ -19,7 +19,7 @@ class HistoryGraphView extends React.Component {
       super(props);
   }
 
-  public state = { toggle: true, histories: [], input: '', currentHistory: '' };
+  public state = { toggle: true, histories: [], input: '', currentHistory: '', onHistory: false };
 
   public handleToggle() {
     this.setState({ toggle: !this.state.toggle });
@@ -32,6 +32,7 @@ class HistoryGraphView extends React.Component {
   public handleFormSubmit(ev) {
     ev.preventDefault();
     chrome.runtime.sendMessage({type: "saveHistory", name: this.state.input}, () => {
+      this.setState({ onHistory: this.state.input });
       alert('saved ' + ev);
     })
   }
@@ -55,7 +56,7 @@ class HistoryGraphView extends React.Component {
 
   public handleClear() {
     chrome.runtime.sendMessage({type: 'clearHistory'}, (resp) => {
-      console.log({this: this});
+      this.setState({ onHistory: false });
       this.loadHistory();
     })
   }
@@ -73,8 +74,9 @@ class HistoryGraphView extends React.Component {
           //.force('center', d3.forceCenter(width / 2, height / 2))
           .alphaTarget(1)
           .on("tick", ticked)
+
       const g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-      let link = g.append("g").attr("stroke", "#000").attr("stroke-width", 1.5).selectAll(".link");
+      let link = g.append("g").attr("stroke", "lightblue").attr("stroke-width", 1.5).selectAll(".link");
       let node = g.selectAll('.node');
       const restart = (restartingSimulation: any) => {
           // Apply the general update pattern to the nodes.
@@ -85,17 +87,23 @@ class HistoryGraphView extends React.Component {
               .attr("r", 8)
               .attr('transform', (d: any) => `translate(${d.x}, ${d.y})`)
               .merge(node);
+          node.append<SVGCircleElement>('circle')
+              .attr('r', 40)
+              .style('stroke', 'lightblue')
+              .style('stroke-width', 2)
+              .style('fill', "white")
           node.append("text")
-              .attr("dx", 12)
+              .attr("dx", -12)
               .attr("dy", ".35em")
               .text((d: any) => d.data.title);
 
-          node.append("image")
-              .attr("xlink:href", "https://github.com/favicon.ico")
-              .attr("x", -8)
-              .attr("y", -8)
-              .attr("width", 20)
-              .attr("height", 20)
+
+          // node.append("image")
+          //     .attr("xlink:href", "https://github.com/favicon.ico")
+          //     .attr("x", -8)
+          //     .attr("y", -8)
+          //     .attr("width", 20)
+          //     .attr("height", 20)
           node.on('click', (d: any) => {
                   window.location = d.data.url;
                   restart(simulation);
@@ -121,6 +129,7 @@ class HistoryGraphView extends React.Component {
                 }
                 restart(simulation);
             })
+
                   node.call(d3.drag()
                       .on("start", dragstarted)
                       .on("drag", dragged)
@@ -179,7 +188,6 @@ class HistoryGraphView extends React.Component {
   }
 
   public componentDidMount() {
-      // this.loadHistory();
       chrome.runtime.sendMessage({type: "addPage", url: window.location.href,
        title: document.getElementsByTagName("title")[0].innerHTML}, (response) => {
         const nodes = response.nodes;
@@ -196,29 +204,33 @@ class HistoryGraphView extends React.Component {
       this.getUserGraphs();    
   }
 
-public render() {
-  const width = window.innerWidth;
-  const height = window.innerHeight / 5;
-  const style = {
-    backgroundColor: 'rgb(255, 255, 255)',
-    height,
-    width,
-    marginBottom: "-8px"
-  };
+  public render() {
+    const width = window.innerWidth;
+    const height = window.innerHeight / 5;
+    const style = {
+      backgroundColor: 'rgb(255, 255, 255)',
+      height,
+      width,
+      marginBottom: "-8px"
+    };
+
+    const inputForm = (<Input
+                      type="text"
+                      onChange={ this.handleInputChange.bind(this) }
+                      placeholder="History Name"
+                      style={{ width: '65%', marginLeft: "10px" }}
+                      />);
 
   const show = (
     <>
       <div style={{ boxShadow: "0 -1px 8px 0 rgba(107, 104, 104, 0.2), 0 -1px 20px 0 rgba(80, 79, 79, 0.19)", backgroundColor: "#f65d5d", paddingBottom: "10px", paddingTop: "3px", position: "relative", height: "45px" }}>
       <Button type="primary" shape="circle" icon="shrink" style={{ marginTop: "3px", float: "left", marginLeft: "5px" }} onClick={ this.handleToggle.bind(this) }></Button>
-      <Form layout="inline" onSubmit={() => {}}>
+      <Form layout="inline">
         <Form.Item>
           <span>
-            <Input
-              type="text"
-              onChange={ this.handleInputChange.bind(this) }
-              placeholder="History Name"
-              style={{ width: '65%', marginLeft: "10px" }}
-            />
+            { this.state.onHistory ? 
+              <h1 style={{ marginRight: '50px', marginLeft: '5px', color: '#ffcaca', fontWeight: 'bold', fontSize: '15px', fontStyle: 'italic' }}>{this.state.onHistory}</h1>
+              : inputForm }
           </span>
         </Form.Item>
         <Form.Item>
@@ -245,7 +257,7 @@ public render() {
       {this.state.toggle ? show : <Button type="primary" shape="circle" icon="arrows-alt" onClick={ this.handleToggle.bind(this) }></Button>}
     </Affix>
     );
-}
+  }
 
   private loadHistory() {
     chrome.runtime.sendMessage({type: "getNodesAndLinks"}, (response) => {

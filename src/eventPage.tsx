@@ -16,19 +16,19 @@ chrome.runtime.onMessage.addListener(
     if (request.type === 'deleteNode') {
       historyGraph.deleteNode(request.id);
     } else if (request.type === "getNodesAndLinks") {
-        console.log('getting nodes and links', historyGraph);
         const res = historyGraph.generateGraph();
         sendResponse(res);
     } else if (request.type === 'saveHistory') {
         const name = request.name;
         currentHistory = name;
+        
         axios.post('http://localhost:3005/api/history', {
             history: name,
             nodes: historyGraph.toJSON()
-        })
+        });
+
     } else if (request.type === 'loadHistory') {
         const name = request.name;
-        console.log('loading, history name:', name)
 
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
@@ -40,6 +40,7 @@ chrome.runtime.onMessage.addListener(
         .catch(err => {
             console.log('ERROR LOADING HISTORY', err);
         })
+
         return true;
     } else if (request.type === 'clearHistory') {
         historyGraph = new HistoryGraph();
@@ -53,9 +54,11 @@ chrome.runtime.onMessage.addListener(
             const historyNode = historyGraph.addPage(url, title);
             for (const url of res.data) {
                 historyGraph.addSuggestion(historyNode, url[1], url[0]);
-                sendResponse(historyGraph.generateGraph());
             }
+            historyGraph.pruneRecommendations();
+            sendResponse(historyGraph.generateGraph());
         })
+        
         return true;
     } 
 });
