@@ -12,10 +12,10 @@ class HistoryGraph {
     nextNodeId: number = 0;
 
     addPage (url, title): any {
-        if (this.pages[url] === undefined) {
-            this.pages[url] = new Page(url, title);
+        if (this.pages[title] === undefined) {
+            this.pages[title] = new Page(url, title);
         }
-        const page = this.pages[url];
+        const page = this.pages[title];
         const historyNode: HistoryNode = new HistoryNode(page, this.lastHistoryNode, this.nextNodeId);
         this.nextNodeId += 1;
         if (this.lastHistoryNode !== null) {

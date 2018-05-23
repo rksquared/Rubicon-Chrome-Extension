@@ -58,6 +58,9 @@ class HistoryGraphView extends React.Component {
 
   public handleChangeHistory = (evt) => {
       const title = evt;
+      chrome.runtime.sendMessage({type: 'clearHistory'}, (resp) => { 
+        this.loadHistory();
+      })  
       chrome.runtime.sendMessage({type: 'loadHistory', name: title }, (resp) => {
         this.setState({onHistory: title});
         this.loadHistory();
