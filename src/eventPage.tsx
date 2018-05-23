@@ -72,7 +72,7 @@ chrome.runtime.onMessage.addListener(
         })
         return true;
     } else if (request.type === 'deleteHistory') {
-        axios.delete('http://localhost:3005/api/history', { params: { history: request.name } })
+        axios.delete('http://localhost:3005/api/history', { data: { history: request.name } })
         .then(res => {
             console.log(res);
             sendResponse({done: 'done'});

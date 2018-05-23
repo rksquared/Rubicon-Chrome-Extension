@@ -4,7 +4,8 @@ import * as React from 'react';
 import './App.css';
 import GraphNode from './GraphNode';
 import * as io from 'socket.io-client';
-import { Affix, Button, Select, Input, Form, Tag } from 'antd';
+import { Affix, Button, Select, Input, Form, Tag, Icon, Tooltip } from 'antd';
+import * as FA from 'react-fa';
 import axios from 'axios';
 
 class HistoryGraphView extends React.Component {
@@ -35,7 +36,13 @@ class HistoryGraphView extends React.Component {
     const type = onHistory ? "updateHistory" : "saveHistory";
     const name = type === "saveHistory" ? input : onHistory;
     chrome.runtime.sendMessage({ type, name }, (response) => {
-      this.setState({ onHistory: name });
+      if (type === "saveHistory") {
+        const newHistories = this.state.histories.slice();
+        newHistories.unshift({ name });
+        this.setState({ onHistory: name, histories: newHistories });
+      } else {
+        this.setState({ onHistory: name })
+      }
     })
   }
 
@@ -61,6 +68,13 @@ class HistoryGraphView extends React.Component {
     chrome.runtime.sendMessage({type: 'clearHistory'}, (resp) => {
       this.setState({ onHistory: false });
       this.loadHistory();
+    })
+  }
+
+  public handleDelete (ev) {
+    chrome.runtime.sendMessage({type: "deleteHistory", name: this.state.onHistory}, (resp) => {
+      this.setState({ histories: this.state.histories.filter(history => history.name !== this.state.onHistory )})
+      this.handleClear();
     })
   }
 
@@ -241,9 +255,10 @@ class HistoryGraphView extends React.Component {
           </span>
         </Form.Item>
         <Form.Item>
-          <Button onClick={ this.handleFormSubmit.bind(this) } style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit">{this.state.onHistory ? "Update" : "Save"}</Button>
-          <Button onClick={ this.handleClear.bind(this) } style={{ marginLeft: "2px", marginBottom: "5px" }} >Clear</Button>
+          <Tooltip title={this.state.onHistory ? "Update \"" + this.state.onHistory + "\" History" : "Save History"}><Button onClick={ this.handleFormSubmit.bind(this) } shape="circle" icon={this.state.onHistory ? "reload" : "download"} style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit"></Button></Tooltip>
+          <Tooltip title="Clear"><Button onClick={ this.handleClear.bind(this) } shape="circle" icon="close" style={{ marginLeft: "2px", marginBottom: "5px" }} ></Button></Tooltip>
         </Form.Item>
+        {this.state.onHistory ? <Tooltip title="Delete History"><Button type="default" shape="circle" icon="delete" style={{ marginTop: "3px", float: "right", right: "160px" }} onClick={ this.handleDelete.bind(this) }/></Tooltip> : null}
         <Select           
           showSearch
           placeholder="Select a History"
