@@ -26,10 +26,11 @@ chrome.runtime.onMessage.addListener(
             history: name,
             nodes: historyGraph.toJSON()
         });
+        sendResponse(currentHistory);
 
     } else if (request.type === 'loadHistory') {
         const name = request.name;
-
+        currentHistory = name;
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
             currentHistory = name;
@@ -44,6 +45,7 @@ chrome.runtime.onMessage.addListener(
         return true;
     } else if (request.type === 'clearHistory') {
         historyGraph = new HistoryGraph();
+        currentHistory = null;
         sendResponse({'clearing': 'clearing'});
     } else if (request.type === 'addPage') {
         const url = request.url;
@@ -58,9 +60,25 @@ chrome.runtime.onMessage.addListener(
             historyGraph.pruneRecommendations();
             sendResponse(historyGraph.generateGraph());
         })
-        
+
         return true;
-    } 
+    } else if (request.type === 'checkHistory') {
+        sendResponse({currentHistory}); 
+    } else if (request.type === "updateHistory") {
+        axios.patch('http://localhost:3005/api/history', { history: request.name, nodes: historyGraph.toJSON() })
+        .then(res => {
+            console.log(res);
+            sendResponse({done: 'done'});
+        })
+        return true;
+    } else if (request.type === 'deleteHistory') {
+        axios.delete('http://localhost:3005/api/history', { params: { history: request.name } })
+        .then(res => {
+            console.log(res);
+            sendResponse({done: 'done'});
+        })
+        return true;
+    }
 });
 
 chrome.tabs.onCreated.addListener((tab) => {

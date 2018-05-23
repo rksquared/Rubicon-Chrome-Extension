@@ -31,9 +31,11 @@ class HistoryGraphView extends React.Component {
 
   public handleFormSubmit(ev) {
     ev.preventDefault();
-    chrome.runtime.sendMessage({type: "saveHistory", name: this.state.input}, () => {
-      this.setState({ onHistory: this.state.input });
-      alert('saved ' + ev);
+    const { onHistory, input } = this.state;
+    const type = onHistory ? "updateHistory" : "saveHistory";
+    const name = type === "saveHistory" ? input : onHistory;
+    chrome.runtime.sendMessage({ type, name }, (response) => {
+      this.setState({ onHistory: name });
     })
   }
 
@@ -50,6 +52,7 @@ class HistoryGraphView extends React.Component {
   public handleChangeHistory = (evt) => {
       const title = evt;
       chrome.runtime.sendMessage({type: 'loadHistory', name: title }, (resp) => {
+        this.setState({onHistory: title});
         this.loadHistory();
       });
   }
@@ -72,7 +75,7 @@ class HistoryGraphView extends React.Component {
           .force("y", d3.forceY((d: any) => 100).strength(d => d.isSuggestion? 0: 1))// d.isSuggestion? d.y: 0))
           .force("x", d3.forceX(700).strength(0.5))
           //.force('center', d3.forceCenter(width / 2, height / 2))
-          .alphaTarget(1)
+          .alphaTarget(0)
           .on("tick", ticked)
 
       const g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
@@ -188,20 +191,24 @@ class HistoryGraphView extends React.Component {
   }
 
   public componentDidMount() {
-      chrome.runtime.sendMessage({type: "addPage", url: window.location.href,
-       title: document.getElementsByTagName("title")[0].innerHTML}, (response) => {
-        const nodes = response.nodes;
-        const links = response.links;
-        this.nodes = Object.keys(nodes).map(id => nodes[id]);
-        this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
-        if (this.restart !== null) {
-          this.restart();
-        } else {
-          this.loadGraph();
-        }
-      });
+    chrome.runtime.sendMessage({type: "checkHistory"}, (resp) => {
+      if (resp) this.setState({onHistory: resp.currentHistory});
+    }) 
 
-      this.getUserGraphs();    
+    chrome.runtime.sendMessage({type: "addPage", url: window.location.href,
+     title: document.getElementsByTagName("title")[0].innerHTML}, (response) => {
+      const nodes = response.nodes;
+      const links = response.links;
+      this.nodes = Object.keys(nodes).map(id => nodes[id]);
+      this.links = links.map((link: any) => ({source: nodes[link.source], target: nodes[link.target]}));
+      if (this.restart !== null) {
+        this.restart();
+      } else {
+        this.loadGraph();
+      }
+    });
+
+    this.getUserGraphs();    
   }
 
   public render() {
@@ -229,12 +236,12 @@ class HistoryGraphView extends React.Component {
         <Form.Item>
           <span>
             { this.state.onHistory ? 
-              <h1 style={{ marginRight: '50px', marginLeft: '5px', color: '#ffcaca', fontWeight: 'bold', fontSize: '15px', fontStyle: 'italic' }}>{this.state.onHistory}</h1>
+              <div style={{ marginRight: '50px', marginLeft: '5px', color: '#ffcaca', fontWeight: 'bold', fontSize: '15px', fontStyle: 'italic' }}>{this.state.onHistory}</div>
               : inputForm }
           </span>
         </Form.Item>
         <Form.Item>
-          <Button onClick={ this.handleFormSubmit.bind(this) } style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit">Save</Button>
+          <Button onClick={ this.handleFormSubmit.bind(this) } style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit">{this.state.onHistory ? "Update" : "Save"}</Button>
           <Button onClick={ this.handleClear.bind(this) } style={{ marginLeft: "2px", marginBottom: "5px" }} >Clear</Button>
         </Form.Item>
         <Select           
