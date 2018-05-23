@@ -28,10 +28,11 @@ class HistoryGraph {
     }
 
     addSuggestion(anchor, url, title) {
-        if (this.pages[url] === undefined) {
-            this.pages[url] = new Page(url, title);
+        console.log({anchor, url, title})
+        if (this.pages[title] === undefined) {
+            this.pages[title] = new Page(url, title);
         }
-        const page = this.pages[url];
+        const page = this.pages[title];
         const suggestionNode: SuggestionNode = new SuggestionNode(page, anchor, this.nextNodeId);
         this.nextNodeId += 1;
         anchor.suggestions.push(suggestionNode);

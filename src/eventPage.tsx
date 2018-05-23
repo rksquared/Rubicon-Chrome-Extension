@@ -54,10 +54,14 @@ chrome.runtime.onMessage.addListener(
         axios.get('http://localhost:3005/api/extensionRecs', { params: { link: url } })
         .then(res => {
             const historyNode = historyGraph.addPage(url, title);
+            console.log('rec:', res.data);
             for (const url of res.data) {
                 historyGraph.addSuggestion(historyNode, url[1], url[0]);
+                console.log('adding suggestions', url)
             }
+            console.log('history with suggestions', historyGraph);
             historyGraph.pruneRecommendations();
+            console.log('history after pruning', historyGraph);
             sendResponse(historyGraph.generateGraph());
         })
 

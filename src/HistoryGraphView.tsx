@@ -229,7 +229,7 @@ class HistoryGraphView extends React.Component {
     const width = window.innerWidth;
     const height = window.innerHeight / 5;
     const style = {
-      backgroundColor: 'rgb(255, 255, 255)',
+      backgroundColor: '#f0f2f5',
       height,
       width,
       marginBottom: "-8px",
@@ -259,7 +259,7 @@ class HistoryGraphView extends React.Component {
           <Tooltip title={this.state.onHistory ? "Update \"" + this.state.onHistory + "\" History" : "Save History"}><Button onClick={ this.handleFormSubmit.bind(this) } shape="circle" icon={this.state.onHistory ? "reload" : "download"} style={{ marginLeft: "-60px", marginBottom: "5px" }} htmlType="submit"></Button></Tooltip>
           <Tooltip title="Clear"><Button onClick={ this.handleClear.bind(this) } shape="circle" icon="close" style={{ marginLeft: "2px", marginBottom: "5px" }} ></Button></Tooltip>
         </Form.Item>
-        {this.state.onHistory ? <Tooltip title="Delete History"><Button type="default" shape="circle" icon="delete" style={{ marginTop: "3px", float: "left", left: "156px" }} onClick={ this.handleDelete.bind(this) }/></Tooltip> : null}
+        {this.state.onHistory ? <Tooltip title="Delete History"><Button type="default" shape="circle" icon="delete" style={{ marginTop: "3px", marginLeft: "-14px" }} onClick={ this.handleDelete.bind(this) }/></Tooltip> : null}
         <Select           
           showSearch
           placeholder="Select a History"
