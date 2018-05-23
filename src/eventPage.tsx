@@ -47,9 +47,17 @@ chrome.runtime.onMessage.addListener(
     } else if (request.type === 'addPage') {
         const url = request.url;
         const title = request.title;
-        historyGraph.addPage(url, title);
-        sendResponse(historyGraph.generateGraph());
-    }
+
+        axios.get('http://localhost:3005/api/extensionRecs', { params: { link: url } })
+        .then(res => {
+            const historyNode = historyGraph.addPage(url, title);
+            for (const url of res.data) {
+                historyGraph.addSuggestion(historyNode, url[1], url[0]);
+                sendResponse(historyGraph.generateGraph());
+            }
+        })
+        return true;
+    } 
 });
 
 chrome.tabs.onCreated.addListener((tab) => {

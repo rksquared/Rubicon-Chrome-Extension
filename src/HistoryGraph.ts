@@ -3,6 +3,7 @@ import HistoryNode from './HistoryNode';
 import SuggestionNode from './SuggestionNode';
 import GraphLink from './GraphLink';
 import Page from './Page';
+import axios from 'axios';
 
 class HistoryGraph {
     pages: {[url: string]: Page} = {};
@@ -10,7 +11,7 @@ class HistoryGraph {
     lastHistoryNode: HistoryNode | null = null;
     nextNodeId: number = 0;
 
-    addPage (url, title): void {
+    addPage (url, title): any {
         if (this.pages[url] === undefined) {
             this.pages[url] = new Page(url, title);
         }
@@ -22,10 +23,8 @@ class HistoryGraph {
         }
         this.lastHistoryNode = historyNode;
         this.nodes.push(historyNode);
-        // add suggestions asynchronously
-        for (const url of ['www.google.com', 'www.stackoverflow.com', 'wikipedia.org']) {
-            //this.addSuggestion(historyNode, url, url);
-        }
+
+        return historyNode;
     }
 
     addSuggestion(anchor, url, title) {
@@ -131,6 +130,10 @@ class HistoryGraph {
         })
         console.log('NODES', Object.keys(nodeDict).map(n => nodeDict[n]));
         this.nodes =  Object.keys(nodeDict).map(n => nodeDict[n]);
+    }
+
+    pruneRecommendations() {
+        console.log(this.nodes);
     }
 }
 
