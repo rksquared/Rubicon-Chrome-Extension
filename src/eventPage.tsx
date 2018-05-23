@@ -8,7 +8,7 @@ import * as io from 'socket.io-client';
 import HistoryGraph from './HistoryGraph';
 import axios from 'axios';
 
-let historyGraph = new HistoryGraph();
+var historyGraph = new HistoryGraph();
 let currentHistory = null;
 
 chrome.runtime.onMessage.addListener(
@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener(
         const name = request.name;
         currentHistory = name;
         historyGraph.pruneRecommendations();
-        
+        console.log('saving History', {historyGraph});
         axios.post('http://localhost:3005/api/history', {
             history: name,
             nodes: historyGraph.toJSON()
@@ -31,13 +31,12 @@ chrome.runtime.onMessage.addListener(
 
     } else if (request.type === 'loadHistory') {
         const name = request.name;
-        currentHistory = name;
         axios.get('http://localhost:3005/api/history', {params: {query: name}})
         .then(res => {
             currentHistory = name;
             historyGraph = new HistoryGraph();
+            console.log('loading history:', {historyGraph});
             historyGraph.fromJSON(res.data);
-            console.log({historyGraph});
             sendResponse({ res: 'gotIt' });
         })
         .catch(err => {
@@ -47,6 +46,7 @@ chrome.runtime.onMessage.addListener(
         return true;
     } else if (request.type === 'clearHistory') {
         historyGraph = new HistoryGraph();
+        console.log('clearing', {historyGraph});
         currentHistory = null;
         sendResponse({'clearing': 'clearing'});
     } else if (request.type === 'addPage') {
@@ -59,11 +59,8 @@ chrome.runtime.onMessage.addListener(
             console.log('rec:', res.data);
             for (const url of res.data) {
                 historyGraph.addSuggestion(historyNode, url[1], url[0]);
-                console.log('adding suggestions', url)
             }
-            console.log('history with suggestions', historyGraph);
             historyGraph.pruneRecommendations();
-            console.log('history after pruning', historyGraph);
             sendResponse(historyGraph.generateGraph());
         })
 
