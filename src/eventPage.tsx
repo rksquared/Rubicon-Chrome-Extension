@@ -21,6 +21,7 @@ chrome.runtime.onMessage.addListener(
     } else if (request.type === 'saveHistory') {
         const name = request.name;
         currentHistory = name;
+        historyGraph.pruneRecommendations();
         
         axios.post('http://localhost:3005/api/history', {
             history: name,
@@ -36,6 +37,7 @@ chrome.runtime.onMessage.addListener(
             currentHistory = name;
             historyGraph = new HistoryGraph();
             historyGraph.fromJSON(res.data);
+            console.log({historyGraph});
             sendResponse({ res: 'gotIt' });
         })
         .catch(err => {
@@ -49,7 +51,7 @@ chrome.runtime.onMessage.addListener(
         sendResponse({'clearing': 'clearing'});
     } else if (request.type === 'addPage') {
         const url = request.url;
-        const title = request.title;
+        let title: any = request.title.slice(0, 10).padEnd(13, '.');
 
         axios.get('http://localhost:3005/api/extensionRecs', { params: { link: url } })
         .then(res => {

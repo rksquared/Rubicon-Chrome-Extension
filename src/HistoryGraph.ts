@@ -76,13 +76,21 @@ class HistoryGraph {
                 prevId: (node.isSuggestion? null: (node.prev === null? null: node.prev.id)),
                 anchorId: node.isSuggestion? node.anchor.id: null,
                 isSuggestion: node.isSuggestion,
-                x: i * 50 - 25 * (this.nodes.length),
-                y: 100,
+                x: i * 400,
+                y: 150,
                 vx: 0,
                 vy: 0
             }
         })
-        
+
+        let last = this.lastHistoryNode;
+                let lastPosition = 0;
+                while (last !== null) {
+                    nodes[last.id].x = lastPosition;
+                    lastPosition -= 150;
+                    last = last.prev;
+                }
+
         return {nodes: nodes, links: links}
     }
 
